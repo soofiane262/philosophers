@@ -12,21 +12,21 @@
 
 #include "philo.h"
 
-void	ft_putstr(char *str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i])
-		write(1, &str[i++], 1);
-}
-
 int	ft_philo(int ac, char **av)
 {
 	t_param	param;
+	t_philo	*philo;
 
+
+	if (ft_get_time(&(param.start_time), 0))
+		return (ft_puterror_ret_1("Error getting time of day\n"));
 	param.nb_philo = 0;
-	if (ft_parse(ac, av, param))
+	if (ft_parse(ac, av, &param))
 		return (1);
+	philo = ft_create_philos(param);
+	if (!philo || ft_create_threads(param, &philo))
+		return (ft_puterror_ret_1("Error creating philosophers\n"));
+	if (ft_into_threads(param, &philo))
+		return (ft_puterror_ret_1("Error dealing with threads\n"));
 	return (0);
 }

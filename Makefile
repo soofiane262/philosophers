@@ -22,7 +22,7 @@ LIB		=	libphilo.a
 
 HDFL	=	philo.h
 
-SRCS	=	philo.c philo_00_parse.c 
+SRCS	=	philo.c philo_00_utils.c philo_01_parse.c philo_02_threads.c
 
 OBJS	=	$(SRCS:.c=.o)
 
