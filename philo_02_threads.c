@@ -22,29 +22,73 @@ int	ft_destroy_all(t_philo **philo)
 		pthread_detach((*philo)[i].philo_id);
 		pthread_mutex_destroy(&((*philo)[i].fork_r));
 	}
-	// pthread_mutex_unlock((*philo)[0].alive_ptr);
 	pthread_mutex_destroy((*philo)[0].alive_ptr);
 	return (0);
 }
 
 int	ft_into_threads(t_param param, t_philo **philo)
 {
-	int	i;
+	int			i;
+	// t_philo_ptr	philo_ptr;
 
+	// philo_ptr.philo = philo;
 	i = -1;
 	while (++i < param.nb_philo)
-		if (pthread_create(&(*philo)[i].philo_id, 0, &ft_life_routine, &(*philo)[i]))
+		if (pthread_create(&(*philo)[i].philo_id, 0, ft_life_routine, (void *)&(*philo)[i]))
 			return (1);
+	ft_cop(philo);
+	// pthread_create(&philo_ptr.cop, 0, ft_cop, (void *)&philo_ptr);
+	return (0);
+}
+
+int	ft_cop(t_philo **philo)
+{
+	int			i;
+
 	while (1)
 	{
-		i = -1;
-		while (++i < param.nb_philo)
+		i = 0;
+		while (i < (*philo)[i].param.nb_philo)
 		{
-			if ((*philo)[i].died)
+			// pthread_mutex_lock((*philo)[i]->alive_ptr);
+			// if ((*philo)[i]->time_left > (*philo)[i]->param.t_die)
+			// 	(*philo)[i]->died = 1;
+			// pthread_mutex_unlock((*philo)[i]->alive_ptr);
+			if ((*philo)[i].died || (*philo)[i].nb_eat == (*philo)[i].param.nb_eat)
+			{
+				if ((*philo)[i].died)
+					ft_print_message(&(*philo)[i], 5);
 				return (ft_destroy_all(philo));
+			}
+			i++;
 		}
 	}
 	return (0);
+}
+
+int	ft_print_message(t_philo *philo, int action)
+{
+	pthread_mutex_lock(philo->print_ptr);
+	if (ft_get_time(&(philo->param.elapsed_time), philo->param.start_time))
+		return (0);
+	ft_putnbr(philo->param.elapsed_time / 1000);
+	ft_putstr("	");
+	ft_putnbr(philo->id);
+	if (action == 1)
+		ft_putstr("	has taken a fork\n");
+	else if (action == 2)
+		ft_putstr("	is eating\n");
+	else if (action == 3)
+		ft_putstr("	is sleeping\n");
+	else if (action == 4)
+		ft_putstr("	is thinking\n");
+	else if (action == 5)
+	{
+		ft_putstr("	died\n");
+		return (0);
+	}
+	pthread_mutex_unlock(philo->print_ptr);
+	return (1);
 }
 
 void	*ft_life_routine(void *x)
@@ -52,65 +96,71 @@ void	*ft_life_routine(void *x)
 	t_philo	*philo;
 
 	philo = x;
-	if (!(philo->id % 2))
-		usleep(10000);
 	if (ft_get_time(&(philo->param.current_time), 0))
 		return (NULL);
 	philo->time_left = 0;
-
-
-
-
+	if (philo->id % 2)
+	{
+		philo->time_left = philo->param.t_die / 2;
+		if (philo->time_left > philo->param.t_die)
+		{
+			ft_print_message(philo, 5);
+			return (NULL);
+		}
+		usleep(philo->time_left);
+	}
 	while (1)
 	{
 		while (philo->time_left < philo->param.t_die && pthread_mutex_lock(&(philo->fork_r)))
 			if (ft_get_time(&(philo->time_left), philo->param.current_time))
 				return (NULL);
 		pthread_mutex_lock(philo->alive_ptr);
-		if (philo->time_left >= philo->param.t_die)
-			break ;
+		if (philo->time_left > philo->param.t_die)
+			philo->died = 1;
+		ft_print_message(philo, 1);
 		pthread_mutex_unlock(philo->alive_ptr);
-		if (ft_get_time(&(philo->param.elapsed_time), philo->param.start_time))
-			return (NULL);
-		printf("%d	%d	has taken a fork\n", philo->param.elapsed_time / 1000, philo->id);
 		while (philo->time_left < philo->param.t_die && pthread_mutex_lock(philo->fork_l))
 			if (ft_get_time(&(philo->time_left), philo->param.current_time))
 				return (NULL);
 		pthread_mutex_lock(philo->alive_ptr);
-		if (philo->time_left >= philo->param.t_die)
-			break ;
+		if (philo->time_left > philo->param.t_die)
+			philo->died = 1;
 		pthread_mutex_unlock(philo->alive_ptr);
-		if (ft_get_time(&(philo->param.elapsed_time), philo->param.start_time))
-			return (NULL);
-		printf("%d	%d	has taken a fork\n", philo->param.elapsed_time / 1000, philo->id);
-		if (ft_get_time(&(philo->param.elapsed_time), philo->param.start_time))
-			return (NULL);
-		printf("%d	%d	is eating\n", philo->param.elapsed_time / 1000, philo->id);
-		usleep(philo->param.t_eat);
+		ft_print_message(philo, 1);
+		ft_print_message(philo, 2);
+		if (ft_get_time(&(philo->param.start_time), 0))
+				return (NULL);
+		philo->time_left = philo->param.t_eat;
+		if (philo->time_left > philo->param.t_die)
+			philo->time_left = philo->param.t_die + 1000;
+		usleep(philo->time_left);
+		pthread_mutex_lock(philo->alive_ptr);
+		if (philo->time_left > philo->param.t_die)
+			philo->died = 1;
+		pthread_mutex_unlock(philo->alive_ptr);
 		pthread_mutex_unlock(philo->fork_l);
 		pthread_mutex_unlock(&(philo->fork_r));
+		philo->nb_eat++;
 		pthread_mutex_lock(philo->alive_ptr);
 		pthread_mutex_unlock(philo->alive_ptr);
-		if (ft_get_time(&(philo->param.elapsed_time), philo->param.start_time))
-			return (NULL);
-		printf("%d	%d	is sleeping\n", philo->param.elapsed_time / 1000, philo->id);
-		usleep(philo->param.t_sleep);
-		philo->time_left = philo->param.t_sleep;
+		ft_print_message(philo, 3);
+		philo->time_left += philo->param.t_sleep;
+		if (philo->time_left > philo->param.t_die && philo->param.t_die - philo->param.t_eat >= 0)
+			usleep(philo->param.t_die - philo->param.t_eat + 1);
+		else if (philo->time_left > philo->param.t_die && philo->param.t_die - philo->param.t_eat < 0)
+			usleep(1000);
+		else
+			usleep(philo->param.t_sleep);
 		pthread_mutex_lock(philo->alive_ptr);
-		if (philo->time_left >= philo->param.t_die)
-			break ;
+		if (philo->time_left > philo->param.t_die)
+			philo->died = 1;
 		pthread_mutex_unlock(philo->alive_ptr);
-		if (ft_get_time(&(philo->param.elapsed_time), philo->param.start_time))
-			return (NULL);
-		printf("%d	%d	is thinking\n", philo->param.elapsed_time / 1000, philo->id);
+		ft_print_message(philo, 4);
 	}
-	if (ft_get_time(&(philo->param.elapsed_time), philo->param.start_time))
-			return (NULL);
-	if (philo->time_left >= philo->param.t_die)
-	{
-		printf("%d	%d	died\n", philo->param.elapsed_time / 1000, philo->id);
-		philo->died = 1;
-	}
+	// if (ft_get_time(&(philo->param.elapsed_time), philo->param.start_time))
+	// 		return (NULL);
+	// if (philo->time_left > philo->param.t_die)
+	// 	ft_print_message(philo, 5);
 	return (NULL);
 }
 
@@ -129,6 +179,11 @@ int	ft_create_threads(t_param param, t_philo **philo)
 	int		i;
 
 	if (pthread_mutex_init(&(*philo)[0].alive, 0))
+	{
+		free(*philo);
+		return (1);
+	}
+	if (pthread_mutex_init(&(*philo)[0].print, 0))
 	{
 		free(*philo);
 		return (1);
@@ -157,6 +212,7 @@ int	ft_create_threads(t_param param, t_philo **philo)
 	while (i < param.nb_philo)
 	{
 		(*philo)[i].alive_ptr = &((*philo)[0].alive);
+		(*philo)[i].print_ptr = &((*philo)[0].print);
 		i++;
 	}
 	return (0);
