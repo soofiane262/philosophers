@@ -34,6 +34,8 @@ typedef struct s_philo
 	int				id;
 	int				time_left;
 	int				nb_eat;
+	int				nb_full_eat;
+	int				*nb_full_eat_ptr;
 	int				died;
 	t_param			param;
 	pthread_t		philo_id;
