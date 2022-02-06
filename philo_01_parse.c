@@ -50,10 +50,9 @@ int	ft_parse(int ac, char **av, t_param *param)
 		return (1);
 	}
 	param->nb_philo = ft_atoi_philo(av[1]);
-	param->t_die = 1000 * ft_atoi_philo(av[2]);
-	param->t_eat = 1000 * ft_atoi_philo(av[3]);
-	param->t_sleep = 1000 * ft_atoi_philo(av[4]);
-	// ft_putnbr(1000);
+	param->t_die = ft_atoi_philo(av[2]);
+	param->t_eat = ft_atoi_philo(av[3]);
+	param->t_sleep = ft_atoi_philo(av[4]);
 	if (ac == 6)
 		param->nb_eat = ft_atoi_philo(av[5]);
 	else

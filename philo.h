@@ -21,8 +21,6 @@
 typedef struct s_param
 {
 	int	start_time;
-	int	current_time;
-	int	elapsed_time;
 	int	nb_philo;
 	int	t_die;
 	int	t_eat;
@@ -33,10 +31,17 @@ typedef struct s_philo
 {
 	int				id;
 	int				time_left;
+	int				print_time;
+	int				current_time;
 	int				nb_eat;
+	int				nb_sleep;
 	int				nb_full_eat;
+	int				in_routine;
+	int				waiting_for_fork;
+	int				*in_routine_ptr;
 	int				*nb_full_eat_ptr;
 	int				died;
+	int				*died_ptr;
 	t_param			param;
 	pthread_t		philo_id;
 	pthread_mutex_t	fork_r;

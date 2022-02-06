@@ -45,18 +45,27 @@ int	ft_cop(t_philo **philo)
 {
 	int			i;
 
+	// if ((*philo)[0].fork_l == &((*philo)[0].fork_r))
+	// {
+	// 	usleep((*philo)[0].param.t_die + 1000);
+	// 	(*philo)[0].died = 1;
+	// 	ft_print_message(&(*philo)[0], 5);
+	// 			return (ft_destroy_all(philo));
+	// }
 	while (1)
 	{
 		i = 0;
-		while (i < (*philo)[i].param.nb_philo && (*philo)[0].in_routine == (*philo)[i].param.nb_philo)
+		while (i < (*philo)[i].param.nb_philo)
 		{
+			while ((*philo)[0].in_routine != (*philo)[i].param.nb_philo)
+				;
 			pthread_mutex_lock((*philo)[i].print_ptr);
 			pthread_mutex_lock((*philo)[i].alive_ptr);
 			if ((*philo)[0].nb_full_eat == (*philo)[i].param.nb_philo)
 				return (ft_destroy_all(philo));
 			if ((*philo)[i].waiting_for_fork)
 				ft_get_time(&(*philo)[i].time_left, (*philo)[i].current_time);
-			if ((*philo)[i].died || (*philo)[i].time_left > (*philo)[i].param.t_die)
+			if ((*philo)[0].died || (*philo)[i].time_left > (*philo)[i].param.t_die)
 			{
 				ft_print_message(&(*philo)[i], 5);
 				return (ft_destroy_all(philo));
