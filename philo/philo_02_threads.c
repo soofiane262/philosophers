@@ -50,7 +50,6 @@ int	ft_cop(t_philo **philo)
 		i = 0;
 		while (i < (*philo)[i].param.nb_philo && (*philo)[0].in_routine == (*philo)[i].param.nb_philo)
 		{
-			pthread_mutex_lock((*philo)[i].print_ptr);
 			pthread_mutex_lock((*philo)[i].alive_ptr);
 			if ((*philo)[0].nb_full_eat == (*philo)[i].param.nb_philo)
 				return (ft_destroy_all(philo));
@@ -58,11 +57,12 @@ int	ft_cop(t_philo **philo)
 				ft_get_time(&(*philo)[i].time_left, (*philo)[i].current_time);
 			if ((*philo)[i].died || (*philo)[i].time_left > (*philo)[i].param.t_die)
 			{
+				if (!(*philo)[i].nb_eat)
+					(*philo)[i].print_time = (*philo)[i].param.t_die + 1;
 				ft_print_message(&(*philo)[i], 5);
 				return (ft_destroy_all(philo));
 			}
 			pthread_mutex_unlock((*philo)[i].alive_ptr);
-			pthread_mutex_unlock((*philo)[i].print_ptr);
 			i++;
 		}
 	}
@@ -71,8 +71,9 @@ int	ft_cop(t_philo **philo)
 
 int	ft_print_message(t_philo *philo, int action)
 {
-	if (ft_get_time(&(philo->print_time), philo->param.start_time))
-		return (0);
+	pthread_mutex_lock(philo->print_ptr);
+	if (!philo->nb_eat && *(philo->died_ptr))
+		philo->print_time = philo->param.t_die + 1;
 	ft_putnbr(philo->print_time);
 	ft_putstr("	");
 	ft_putnbr(philo->id);
@@ -93,68 +94,129 @@ int	ft_print_message(t_philo *philo, int action)
 	return (1);
 }
 
+// void	ft_life_routine_ext0(t_philo *philo)
+// {}
+
 void	*ft_life_routine(void *x)
 {
 	t_philo	*philo;
 
 	philo = x;
+	pthread_mutex_lock(philo->alive_ptr);
 	*(philo->in_routine_ptr) += 1;
-	if (ft_get_time(&(philo->current_time), 0))
-		return (NULL);
+	pthread_mutex_unlock(philo->alive_ptr);
+	while (*(philo->in_routine_ptr) != philo->param.nb_philo)
+		;
+	ft_get_time(&(philo->current_time), 0);
 	philo->time_left = 0;
+	philo->print_time = 0;
 	if (!(philo->id % 2))
 	{
-		usleep(philo->param.t_die / 2);
+		philo->sleep_time = philo->param.t_die / 2;
+		// while (philo->sleep_time >= 0)
+		// {
+		// 	ft_get_time(&(philo->temp_time), 0);
+			usleep((philo->sleep_time) * 1000);
+			// ft_get_time(&(philo->temp_time), philo->temp_time);
+			// philo->sleep_time -= philo->temp_time;
+			// // pthread_mutex_lock(philo->print_ptr);
+		// }
 		philo->time_left = philo->param.t_die / 2;
+		philo->print_time += philo->param.t_die / 2;
 	}
 	while (1)
 	{
 		philo->waiting_for_fork = 1;
+		ft_get_time(&(philo->temp_time), 0);
 		pthread_mutex_lock(&(philo->fork_r));
-		pthread_mutex_lock(philo->print_ptr);
+		ft_get_time(&(philo->temp_time), philo->temp_time);
+		philo->print_time += philo->temp_time;
+		// philo->print_time /= 10;
+		// philo->print_time *= 10;
 		ft_print_message(philo, 1);
+		ft_get_time(&(philo->temp_time), 0);
 		pthread_mutex_lock(philo->fork_l);
-		pthread_mutex_unlock(philo->alive_ptr);
-		pthread_mutex_lock(philo->print_ptr);
+		ft_get_time(&(philo->temp_time), philo->temp_time);
+		philo->print_time += philo->temp_time;
+		// philo->print_time /= 10;
+		// philo->print_time *= 10;
 		ft_print_message(philo, 1);
-		pthread_mutex_lock(philo->print_ptr);
 		ft_print_message(philo, 2);
 		philo->waiting_for_fork = 0;
-		if (ft_get_time(&(philo->current_time), 0))
-			return (NULL);
+		ft_get_time(&(philo->current_time), 0);
 		if (philo->param.t_eat > philo->param.t_die)
 		{
-			usleep(philo->param.t_die * 1000 + 1000);
+			philo->print_time += philo->param.t_die + 1;
+			philo->sleep_time = philo->param.t_die + 1;
+			// while (philo->sleep_time >= 0)
+			// {
+			// 	ft_get_time(&(philo->temp_time), 0);
+				usleep((philo->sleep_time) * 1000);
+			// 	ft_get_time(&(philo->temp_time), philo->temp_time);
+			// 	philo->sleep_time -= philo->temp_time;
+			// }
 			*(philo->died_ptr) = philo->id;
 			break ;
 		}
-		usleep(philo->param.t_eat * 1000);
+		philo->print_time += philo->param.t_eat;
+		philo->sleep_time = philo->param.t_eat;
+		// while (philo->sleep_time >= 0)
+		// {
+		// 	ft_get_time(&(philo->temp_time), 0);
+			usleep((philo->sleep_time) * 1000);
+		// 	ft_get_time(&(philo->temp_time), philo->temp_time);
+		// 	philo->sleep_time -= philo->temp_time;
+		// }
 		philo->nb_eat++;
 		if (philo->nb_eat == philo->param.nb_eat)
 			*(philo->nb_full_eat_ptr) += 1;
+		ft_get_time(&(philo->current_time), 0);
+		philo->current_time += philo->param.t_eat;
 		pthread_mutex_unlock(philo->fork_l);
 		pthread_mutex_unlock(&(philo->fork_r));
-		pthread_mutex_lock(philo->print_ptr);
 		ft_print_message(philo, 3);
 		if (philo->param.t_sleep + philo->param.t_eat > philo->param.t_die)
 		{
 			if (philo->param.t_die - philo->param.t_eat > 0)
-				usleep((philo->param.t_die - philo->param.t_eat) * 1000 + 1000);
+			{
+				philo->print_time += philo->param.t_die - philo->param.t_eat + 1;
+				philo->sleep_time = philo->param.t_die - philo->param.t_eat + 1;
+				// while (philo->sleep_time >= 0)
+				// {
+				// 	ft_get_time(&(philo->temp_time), 0);
+					usleep((philo->sleep_time) * 1000);
+				// 	ft_get_time(&(philo->temp_time), philo->temp_time);
+				// 	philo->sleep_time -= philo->temp_time;
+				// }
+			}
 			else
-				usleep(1000);
+			{
+				philo->print_time += 1;
+				philo->sleep_time = 1;
+				// while (philo->sleep_time >= 0)
+				// {
+				// 	ft_get_time(&(philo->temp_time), 0);
+					usleep((philo->sleep_time) * 1000);
+				// 	ft_get_time(&(philo->temp_time), philo->temp_time);
+				// 	philo->sleep_time -= philo->temp_time;
+				// }
+			}
 			*(philo->died_ptr) = philo->id;
 			break ;
 		}
-		usleep(philo->param.t_sleep);
-		if (ft_get_time(&(philo->current_time), 0))
-			return (NULL);
-		philo->current_time += philo->param.t_eat;
-		usleep(philo->param.t_sleep * 1000);
+		philo->print_time += philo->param.t_sleep;
+		philo->sleep_time = philo->param.t_sleep;
+		// while (philo->sleep_time >= 0)
+		// {
+		// 	ft_get_time(&(philo->temp_time), 0);
+			usleep((philo->sleep_time) * 1000);
+		// 	ft_get_time(&(philo->temp_time), philo->temp_time);
+		// 	philo->sleep_time -= philo->temp_time;
+		// }
 		philo->nb_sleep++;
 		pthread_mutex_lock(philo->print_ptr);
 		ft_print_message(philo, 4);
-		if (ft_get_time(&(philo->current_time), 0))
-			return (NULL);
+		ft_get_time(&(philo->current_time), 0);
 		philo->current_time += philo->param.t_eat + philo->param.t_sleep;
 	}
 	return (NULL);

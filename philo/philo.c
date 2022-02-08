@@ -17,9 +17,7 @@ int	ft_philo(int ac, char **av)
 	t_param	param;
 	t_philo	*philo;
 
-
-	if (ft_get_time(&(param.start_time), 0))
-		return (ft_puterror_ret_1("Error getting time of day\n"));
+	ft_get_time(&(param.start_time), 0);
 	param.nb_philo = 0;
 	if (ft_parse(ac, av, &param))
 		return (1);
