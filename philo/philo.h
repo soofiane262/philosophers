@@ -35,13 +35,14 @@ typedef struct s_philo
 	int				current_time;
 	int				nb_eat;
 	int				nb_sleep;
-	int				nb_full_eat;
-	int				in_routine;
+	int				first_in;
 	int				waiting_for_fork;
-	int				*in_routine_ptr;
+	int				nb_full_eat;
 	int				*nb_full_eat_ptr;
 	int				died;
 	int				*died_ptr;
+	int				in_routine;
+	int				*in_routine_ptr;
 	t_param			param;
 	pthread_t		philo_id;
 	pthread_mutex_t	fork_r;
@@ -52,11 +53,6 @@ typedef struct s_philo
 	pthread_mutex_t	*print_ptr;
 
 }	t_philo;
-// typedef struct s_philo_ptr
-// {
-// 	t_philo		**philo;
-// 	pthread_t	cop;
-// } 	t_philo_ptr;
 int		ft_philo(int ac, char **av);
 int		ft_parse(int ac, char **av, t_param *param);
 t_philo	*ft_create_philos(t_param param);

@@ -48,21 +48,19 @@ int	ft_cop(t_philo **philo)
 	while (1)
 	{
 		i = 0;
-		while (i < (*philo)[i].param.nb_philo && (*philo)[0].in_routine == (*philo)[i].param.nb_philo)
+		while (i < (*philo)[i].param.nb_philo/* && (*philo)[0].in_routine == (*philo)[i].param.nb_philo*/)
 		{
-			pthread_mutex_lock((*philo)[i].print_ptr);
 			pthread_mutex_lock((*philo)[i].alive_ptr);
 			if ((*philo)[0].nb_full_eat == (*philo)[i].param.nb_philo)
 				return (ft_destroy_all(philo));
-			if ((*philo)[i].waiting_for_fork)
-				ft_get_time(&(*philo)[i].time_left, (*philo)[i].current_time);
+			// if ((*philo)[i].waiting_for_fork)
+			ft_get_time(&(*philo)[i].time_left, (*philo)[i].current_time);
 			if ((*philo)[i].died || (*philo)[i].time_left > (*philo)[i].param.t_die)
 			{
 				ft_print_message(&(*philo)[i], 5);
 				return (ft_destroy_all(philo));
 			}
 			pthread_mutex_unlock((*philo)[i].alive_ptr);
-			pthread_mutex_unlock((*philo)[i].print_ptr);
 			i++;
 		}
 	}
@@ -71,8 +69,8 @@ int	ft_cop(t_philo **philo)
 
 int	ft_print_message(t_philo *philo, int action)
 {
-	if (ft_get_time(&(philo->print_time), philo->param.start_time))
-		return (0);
+	pthread_mutex_lock(philo->print_ptr);
+	ft_get_time(&(philo->print_time), philo->param.start_time);
 	ft_putnbr(philo->print_time);
 	ft_putstr("	");
 	ft_putnbr(philo->id);
@@ -93,68 +91,85 @@ int	ft_print_message(t_philo *philo, int action)
 	return (1);
 }
 
+void	ft_usleep(int to_sleep)
+{
+	int	temp;
+	int	temp_start;
+
+	ft_get_time(&temp_start, 0);
+	while (ft_get_time(&temp, temp_start) < to_sleep);
+}
+
 void	*ft_life_routine(void *x)
 {
 	t_philo	*philo;
 
 	philo = x;
+	pthread_mutex_lock(philo->print_ptr);
+	if (!*(philo->in_routine_ptr))
+	{
+		pthread_mutex_lock(philo->alive_ptr);
+		philo->first_in = 1;
+	}
 	*(philo->in_routine_ptr) += 1;
-	if (ft_get_time(&(philo->current_time), 0))
-		return (NULL);
+	pthread_mutex_unlock(philo->print_ptr);
+	if (philo->first_in)
+	{
+		while (*(philo->in_routine_ptr) != philo->param.nb_philo);
+		pthread_mutex_unlock(philo->alive_ptr);
+	}
+	else
+	{
+		pthread_mutex_lock(philo->alive_ptr);
+		pthread_mutex_unlock(philo->alive_ptr);
+	}
+	ft_get_time(&(philo->current_time), 0);
 	philo->time_left = 0;
+	philo->print_time = 0;
 	if (!(philo->id % 2))
 	{
-		usleep(philo->param.t_die / 2);
+		ft_usleep(philo->param.t_die / 2);
 		philo->time_left = philo->param.t_die / 2;
 	}
 	while (1)
 	{
 		philo->waiting_for_fork = 1;
 		pthread_mutex_lock(&(philo->fork_r));
-		pthread_mutex_lock(philo->print_ptr);
+
 		ft_print_message(philo, 1);
 		pthread_mutex_lock(philo->fork_l);
-		pthread_mutex_unlock(philo->alive_ptr);
-		pthread_mutex_lock(philo->print_ptr);
 		ft_print_message(philo, 1);
-		pthread_mutex_lock(philo->print_ptr);
 		ft_print_message(philo, 2);
 		philo->waiting_for_fork = 0;
-		if (ft_get_time(&(philo->current_time), 0))
-			return (NULL);
+		ft_get_time(&(philo->current_time), 0);
 		if (philo->param.t_eat > philo->param.t_die)
 		{
-			usleep(philo->param.t_die * 1000 + 1000);
+			ft_usleep(philo->param.t_die + 1);
 			*(philo->died_ptr) = philo->id;
 			break ;
 		}
-		usleep(philo->param.t_eat * 1000);
+		ft_usleep(philo->param.t_eat);
 		philo->nb_eat++;
 		if (philo->nb_eat == philo->param.nb_eat)
 			*(philo->nb_full_eat_ptr) += 1;
 		pthread_mutex_unlock(philo->fork_l);
 		pthread_mutex_unlock(&(philo->fork_r));
-		pthread_mutex_lock(philo->print_ptr);
 		ft_print_message(philo, 3);
 		if (philo->param.t_sleep + philo->param.t_eat > philo->param.t_die)
 		{
 			if (philo->param.t_die - philo->param.t_eat > 0)
-				usleep((philo->param.t_die - philo->param.t_eat) * 1000 + 1000);
+				ft_usleep(philo->param.t_die - philo->param.t_eat + 1);
 			else
-				usleep(1000);
+				ft_usleep(1);
 			*(philo->died_ptr) = philo->id;
 			break ;
 		}
-		usleep(philo->param.t_sleep);
-		if (ft_get_time(&(philo->current_time), 0))
-			return (NULL);
+		ft_get_time(&(philo->current_time), 0);
 		philo->current_time += philo->param.t_eat;
-		usleep(philo->param.t_sleep * 1000);
+		ft_usleep(philo->param.t_sleep);
 		philo->nb_sleep++;
-		pthread_mutex_lock(philo->print_ptr);
 		ft_print_message(philo, 4);
-		if (ft_get_time(&(philo->current_time), 0))
-			return (NULL);
+		ft_get_time(&(philo->current_time), 0);
 		philo->current_time += philo->param.t_eat + philo->param.t_sleep;
 	}
 	return (NULL);

@@ -57,8 +57,8 @@ int	ft_get_time(int *time, int start)
 {
 	struct timeval	tp;
 
-	if (gettimeofday(&tp, NULL) == -1)
-		return (1);
+	gettimeofday(&tp, NULL);
 	(*time) = tp.tv_sec * 1000 + tp.tv_usec / 1000 - start;
-	return (0);
+	// printf("time : %ld, start : %ld\n", *time, start);
+	return (*time);
 }
