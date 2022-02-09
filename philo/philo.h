@@ -32,9 +32,6 @@ typedef struct s_philo
 	int				id;
 	int				time_left;
 	int				print_time;
-	int				temp_time;
-	int				temp2_time;
-	int				sleep_time;
 	int				current_time;
 	int				nb_eat;
 	int				nb_sleep;

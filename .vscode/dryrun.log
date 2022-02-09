@@ -1,6 +1,0 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory `/Users/sel-mars/Desktop/42Cursus/08_philosophers/08_philosophers_WIP'
-make: Leaving directory `/Users/sel-mars/Desktop/42Cursus/08_philosophers/08_philosophers_WIP'
- 
-make: *** No targets specified and no makefile found.  Stop.
- 
