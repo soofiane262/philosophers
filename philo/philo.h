@@ -36,6 +36,8 @@ typedef struct s_philo
 	int				nb_eat;
 	int				nb_sleep;
 	int				first_in;
+	int				last_odd_in;
+	int				last_even_in;
 	int				waiting_for_fork;
 	int				nb_full_eat;
 	int				*nb_full_eat_ptr;
