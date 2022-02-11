@@ -36,7 +36,7 @@ void	ft_putstr(char *str)
 		ft_putchar(str[i++]);
 }
 
-void	ft_putnbr(int nb)
+void	ft_putnbr(long nb)
 {
 	if (nb >= 0 && nb <= 9)
 		ft_putchar(nb + '0');
@@ -53,7 +53,7 @@ void	ft_putnbr(int nb)
 	}
 }
 
-int	ft_get_time(int *time, int start)
+long	ft_get_time(long *time, long start)
 {
 	struct timeval	tp;
 

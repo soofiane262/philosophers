@@ -55,8 +55,8 @@ int	ft_cop(t_philo **philo)
 				pthread_mutex_lock((*philo)[i].print_ptr);
 				return (ft_destroy_all(philo));
 			}
-			ft_get_time(&(*philo)[i].time_left, (*philo)[i].current_time);
-			if ((*philo)[i].died || (*philo)[i].time_left > (*philo)[i].param.t_die)
+			ft_get_time(&(*philo)[i].elapsed_time, (*philo)[i].current_time);
+			if ((*philo)[i].died || (*philo)[i].elapsed_time > (*philo)[i].param.t_die)
 			{
 				ft_print_message(&(*philo)[i], 5);
 				return (ft_destroy_all(philo));
@@ -82,7 +82,7 @@ void	ft_print_message_ext(t_philo *philo, int action)
 		&& philo->temp_time >= philo->param.t_eat - 10 && philo->nb_eat)
 		philo->print_time += philo->param.t_eat;
 	else if (action == 5 && philo->waiting_for_fork)
-		philo->print_time += philo->time_left;
+		philo->print_time += philo->elapsed_time;
 }
 
 int	ft_print_message(t_philo *philo, int action)
@@ -142,7 +142,7 @@ void	ft_life_routine_ext_00(t_philo *philo)
 	}
 	ft_get_time(&philo->time_in_print, 0);
 	ft_get_time(&(philo->current_time), 0);
-	philo->time_left = 0;
+	philo->elapsed_time = 0;
 	philo->print_time = 0;
 	if (!(philo->id % 2))
 		ft_usleep(philo->param.t_die / 2);

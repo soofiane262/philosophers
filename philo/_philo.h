@@ -30,7 +30,7 @@ typedef struct s_param
 typedef struct s_philo
 {
 	int				id;
-	int				time_left;
+	int				elapsed_time;
 	int				temp_time;
 	int				time_in_print;
 	int				print_time;
