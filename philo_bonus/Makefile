@@ -10,7 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
-NAME	=	philo
+NAME	=	philo_bonus
 
 CC		=	cc
 
@@ -18,12 +18,12 @@ CFLAGS	=	-Wall -Wextra -Werror
 
 AR		=	ar rc
 
-LIB		=	libphilo.a
+LIB		=	libphilo_bonus.a
 
-HDFL	=	philo.h
+HDFL	=	philo_bonus.h
 
-SRCS	=	philo.c philo_00_utils.c philo_01_parse.c philo_02_create.c\
-			philo_03_threads.c
+SRCS	=	philo_bonus.c philo_00_utils_bonus.c philo_01_parse_bonus.c philo_02_create_bonus.c\
+			philo_03_fork_bonus.c
 
 OBJS	=	$(SRCS:%.c=%.o)
 
@@ -31,7 +31,7 @@ all: $(NAME)
 
 $(NAME): $(OBJS) $(HDFL)
 	$(AR) $(LIB) $(OBJS)
-	$(CC) $(CFLAGS) main.c -L. -lphilo -o $(NAME)
+	$(CC) $(CFLAGS) main_bonus.c -L. -lphilo_bonus -o $(NAME)
 
 clean:
 	rm -f $(OBJS) $(LIB)

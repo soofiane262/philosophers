@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   philo_01_parse.c                                   :+:      :+:    :+:   */
+/*   philo_01_parse_bonus.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sel-mars <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 void	ft_usleep(int to_sleep, long start)
 {
@@ -20,25 +20,11 @@ void	ft_usleep(int to_sleep, long start)
 		usleep(50);
 }
 
-int	ft_destroy_all(t_philo **philo)
-{
-	int	i;
-
-	i = -1;
-	while (++i < (*philo)[0].param.nb_philo)
-		pthread_mutex_destroy(&((*philo)[i].fork_r));
-	pthread_mutex_destroy((*philo)[0].alive_ptr);
-	pthread_mutex_destroy((*philo)[0].print_ptr);
-	return (0);
-}
-
 int	ft_isnum_philo(char *str)
 {
 	int	i;
 
 	i = 0;
-	if (str[i] == '+')
-		i++;
 	while (str[i] && str[i] >= '0' && str[i] <= '9')
 		i++;
 	if (!str[i])
@@ -64,28 +50,32 @@ int	ft_atoi_philo(char *str)
 	return (ret);
 }
 
-int	ft_parse(int ac, char **av, t_param *param)
+int	ft_parse_error(t_param **param, char *str)
+{
+	free(*param);
+	ft_putstr(str);
+	return (1);
+}
+
+int	ft_parse(int ac, char **av, t_param **param)
 {
 	if (ac != 5 && ac != 6)
-	{
-		ft_putstr("Error\nInvalid number of arguments\n");
-		return (1);
-	}
-	param->nb_philo = ft_atoi_philo(av[1]);
-	param->t_die = ft_atoi_philo(av[2]);
-	param->t_eat = ft_atoi_philo(av[3]);
-	param->t_sleep = ft_atoi_philo(av[4]);
+		return (ft_parse_error(param, "Error\nInvalid number of arguments\n"));
+	(*param)->nb_philo = ft_atoi_philo(av[1]);
+	(*param)->t_die = ft_atoi_philo(av[2]);
+	(*param)->t_eat = ft_atoi_philo(av[3]);
+	(*param)->t_sleep = ft_atoi_philo(av[4]);
 	if (ac == 6)
-		param->nb_eat = ft_atoi_philo(av[5]);
+		(*param)->nb_eat = ft_atoi_philo(av[5]);
 	else
-		param->nb_eat = -2;
-	if (param->nb_philo == -1 || param->t_die == -1 || param->t_eat == -1
-		|| param->t_sleep == -1 || param->nb_eat == -1)
+		(*param)->nb_eat = -2;
+	if ((*param)->nb_philo == -1 || (*param)->t_die == -1 || (*param)->t_eat == -1
+		|| (*param)->t_sleep == -1 || (*param)->nb_eat == -1)
+		return (ft_parse_error(param, "Error\nInvalid argument\n"));
+	else if (!(*param)->nb_eat)
 	{
-		ft_putstr("Error\nInvalid argument\n");
+		free(*param);
 		return (1);
 	}
-	else if (!param->nb_eat)
-		return (1);
 	return (0);
 }
