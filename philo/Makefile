@@ -22,7 +22,8 @@ LIB		=	libphilo.a
 
 HDFL	=	philo.h
 
-SRCS	=	philo.c philo_00_utils.c philo_01_parse.c philo_02_threads.c
+SRCS	=	philo.c philo_00_utils.c philo_01_parse.c philo_02_threads.c\
+			philo_03_routine.c philo_04_routine_ext_0.c philo_05_routine_ext_1.c
 
 OBJS	=	$(SRCS:.c=.o)
 
