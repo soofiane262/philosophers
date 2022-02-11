@@ -12,6 +12,26 @@
 
 #include "philo.h"
 
+void	ft_usleep(int to_sleep, long start)
+{
+	long	temp;
+
+	while (ft_get_time(&temp, 0) < start + to_sleep)
+		usleep(50);
+}
+
+int	ft_destroy_all(t_philo **philo)
+{
+	int	i;
+
+	i = -1;
+	while (++i < (*philo)[0].param.nb_philo)
+		pthread_mutex_destroy(&((*philo)[i].fork_r));
+	pthread_mutex_destroy((*philo)[0].alive_ptr);
+	pthread_mutex_destroy((*philo)[0].print_ptr);
+	return (0);
+}
+
 int	ft_isnum_philo(char *str)
 {
 	int	i;

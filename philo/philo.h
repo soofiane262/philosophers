@@ -54,20 +54,25 @@ typedef struct s_philo
 
 }	t_philo;
 int		ft_philo(int ac, char **av);
+int		ft_cop(t_philo **philo);
 void	ft_putchar(char c);
 int		ft_puterror_ret_1(char *str);
 void	ft_putstr(char *str);
 void	ft_putnbr(long nb);
 long	ft_get_time(long *time, long start);
+void	ft_usleep(int to_sleep, long start);
+int		ft_destroy_all(t_philo **philo);
 int		ft_isnum_philo(char *str);
 int		ft_atoi_philo(char *str);
 int		ft_parse(int ac, char **av, t_param *param);
-int	ft_destroy_all(t_philo **philo);
-int	ft_into_threads(t_param param, t_philo **philo);
-int	ft_cop(t_philo **philo);
-int	ft_print_message(t_philo *philo, int action);
-void	ft_usleep(int to_sleep, long start);
-void	*ft_life_routine(void *x);
 t_philo	*ft_create_philos(t_param param);
-int	ft_create_threads(t_param param, t_philo **philo);
+int		ft_create_threads_ext_00(t_philo **philo);
+int		ft_create_threads_ext_01(t_philo **philo, int i);
+int		ft_create_threads_ext_02(t_param param, t_philo **philo);
+int		ft_create_threads(t_param param, t_philo **philo);
+int		ft_into_threads_error(t_philo **philo, int i);
+int		ft_into_threads(t_param param, t_philo **philo);
+int		ft_print_message(t_philo *philo, int action);
+void	ft_life_routine_ext(t_philo *philo);
+void	*ft_life_routine(void *x);
 #endif
