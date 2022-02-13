@@ -35,7 +35,6 @@ typedef struct s_philo
 	long			current_time;
 	long			temp_time;
 	int				nb_eat;
-	int				waiting_for_fork;
 	long			start_time;
 	long			*start_time_ptr;
 	int				nb_full_eat;
@@ -71,7 +70,7 @@ int		ft_create_threads_ext_02(t_param param, t_philo **philo);
 int		ft_create_threads(t_param param, t_philo **philo);
 int		ft_into_threads_error(t_philo **philo, int i);
 int		ft_into_threads(t_param param, t_philo **philo);
-int		ft_print_message(t_philo *philo, int action);
+void	ft_print_message(t_philo *philo, int action);
 void	ft_life_routine_ext(t_philo *philo);
 void	*ft_life_routine(void *x);
 #endif

@@ -43,7 +43,7 @@ int	ft_into_threads(t_param param, t_philo **philo)
 	return (0);
 }
 
-int	ft_print_message(t_philo *philo, int action)
+void	ft_print_message(t_philo *philo, int action)
 {
 	pthread_mutex_lock(philo->print_ptr);
 	ft_get_time(&(philo->print_time), *(philo->start_time_ptr));
@@ -61,21 +61,18 @@ int	ft_print_message(t_philo *philo, int action)
 	else if (action == 5)
 	{
 		ft_putstr("	died\n");
-		return (0);
+		return ;
 	}
 	pthread_mutex_unlock(philo->print_ptr);
-	return (1);
 }
 
 void	ft_life_routine_ext(t_philo *philo)
 {
-	philo->waiting_for_fork = 1;
 	pthread_mutex_lock(&(philo->fork_r));
 	ft_print_message(philo, 1);
 	pthread_mutex_lock(philo->fork_l);
 	ft_print_message(philo, 1);
 	ft_print_message(philo, 2);
-	philo->waiting_for_fork = 0;
 	ft_get_time(&(philo->current_time), 0);
 	ft_usleep(philo->param.t_eat, ft_get_time(&philo->temp_time, 0));
 	philo->nb_eat++;

@@ -12,16 +12,28 @@
 
 #include "philo_bonus.h"
 
+void	ft_check(t_philo **philo)
+{
+	int	i;
+
+	i = -1;
+	waitpid(-1, NULL, 0);
+	ft_end(philo, (*philo)[0].common.nb_philo);
+}
+
 int	ft_philo_bonus(int ac, char **av)
 {
-	t_param	*param;
+	t_common	common;
+	t_philo		*philo;
 
-	param = (t_param *)malloc(sizeof(t_param));
-	if (ft_parse(ac, av, &param))
+	common.nb_eat = 0;
+	if (ft_parse(ac, av, &common))
 		return (1);
-	sem_unlink("/forks");
-	param->sem = sem_open("/forks", O_CREAT, 777, param->nb_philo);
-	printf("nb_philo	:	%d\nt_die		:	%d\nt_eat		:	%d\nt_sleep		:	%d\n", param->nb_philo, param->t_die, param->t_eat, param->t_sleep);
-	sem_close(param->sem);
+	philo = ft_create_philos(&common);
+	if (!philo)
+		return (ft_puterror_ret_1("Error creating philos\n"));
+	if (ft_create_philo_processes(&philo))
+		return (ft_puterror_ret_1("Error creating forks\n"));
+	ft_check(&philo);
 	return (0);
 }
